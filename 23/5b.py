@@ -38,7 +38,7 @@ seeds = seeds.split(" ")
 seeds = map(int, seeds)
 seeds = more_itertools.grouper(seeds, 2)
 seeds = (range(start, start + length) for start, length in seeds)
-seeds = list(flatten(seeds))
+seeds = flatten(seeds)
 
 old_mas = mas
 mas = []
@@ -55,9 +55,7 @@ for ma in old_mas:
 
     mas.append(ma)
 
-input("Starting")
 for ma in mas:
-    input("Next iteration")
-    seeds = list(seeds); print(seeds)
     seeds = map(ma.__getitem__, seeds)
+input("Doing operation")
 print(min(seeds))
