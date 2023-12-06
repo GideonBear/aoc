@@ -1,6 +1,7 @@
 import more_itertools
 from dataclasses import dataclass
 from pprint import pprint
+from tqdm import tqdm
 
 with open('5.txt') as f:
     text = f.read().strip('\n')
@@ -36,7 +37,8 @@ seeds, *mas = text.split("\n\n")
 seeds = seeds.removeprefix("seeds: ")
 seeds = seeds.split(" ")
 seeds = map(int, seeds)
-seeds = more_itertools.grouper(seeds, 2)
+seeds = list(more_itertools.grouper(seeds, 2))
+total_seeds = sum(length for start, length in seeds)
 seeds = (range(start, start + length) for start, length in seeds)
 seeds = flatten(seeds)
 
@@ -56,6 +58,7 @@ for ma in old_mas:
     mas.append(ma)
 
 for ma in mas:
-    seeds = map(ma.__getitem__, seeds)
-input("Doing operation")
+    input("Doing iteration")
+    seeds = list(map(ma.__getitem__, tqdm(seeds, total=total_seeds)))
+#input("Doing operation")
 print(min(seeds))
