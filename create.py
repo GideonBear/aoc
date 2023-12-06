@@ -7,9 +7,10 @@ num = re.compile(
     r'[0-9]+'
 )
 text = r'''
-with open('{}.txt') as f:
-    text = f.read().strip('\n')
-'''.strip('\n') + '\n' * 4
+use std::fs;
+
+let text = fs::read_to_string("{}.txt").expect("Error while reading file");
+'''.strip('\n') + '\n' * 3
 
 
 here = Path()
@@ -24,7 +25,7 @@ new_year = here / str(new_yearnum)
 new_year.mkdir()
 
 for i in range(1, 26):
-    (new_year / f'{i}a.py').write_text(text.format(i))
-    (new_year / f'{i}b.py').write_text(text.format(i))
+    (new_year / f'{i}a.rs').write_text(text.format(i))
+    (new_year / f'{i}b.rs').write_text(text.format(i))
 
 print(f'Created {new_year}')
