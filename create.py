@@ -9,8 +9,12 @@ num = re.compile(
 text = r'''
 use std::fs;
 
-let text = fs::read_to_string("{}.txt").expect("Error while reading file");
-'''.strip('\n') + '\n' * 3
+fn main() {{
+    let text = fs::read_to_string("{}.txt").expect("Error while reading file");
+    
+    
+}}
+'''
 
 
 here = Path()
