@@ -54,7 +54,7 @@ impl Ma {
 
     fn get(&self, item: u32) -> u32 {
         for (dest_start, source_start, length) in &self.ranges {
-            if *source_start <= item && item <= source_start + length {
+            if *source_start <= item && item < source_start + length {
                 return dest_start + (item - source_start);
             }
         }
@@ -63,7 +63,7 @@ impl Ma {
 }
 
 fn main() {
-    let text = fs::read_to_string("5e2.txt").expect("Error while reading file");
+    let text = fs::read_to_string("5.txt").expect("Error while reading file");
 
     let mut groups = text.split("\n\n");
     let seeds: Vec<(u32, u32)> = groups
