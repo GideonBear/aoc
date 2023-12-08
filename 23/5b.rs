@@ -1,14 +1,12 @@
 //! ```cargo
 //! [dependencies]
 //! itertools = "0.12.0"
-//! proceed = "0.1.0"
 //! indicatif = "0.17.7"
 //! ```
 
 use std::fs;
 use itertools::Itertools;
 use std::ops::Range;
-use proceed::proceed;
 use indicatif::ProgressBar;
 use std::iter::Iterator;
 
@@ -65,7 +63,7 @@ impl Ma {
 }
 
 fn main() {
-    let text = fs::read_to_string("5e.txt").expect("Error while reading file");
+    let text = fs::read_to_string("5e2.txt").expect("Error while reading file");
 
     let mut groups = text.split("\n\n");
     let seeds: Vec<(u32, u32)> = groups
@@ -107,8 +105,14 @@ fn main() {
     }
 
     for ma in mas {
+        /*let s: Vec<_> = seeds.collect();
+        println!("{s:?}");
+        seeds = Box::new(s.into_iter());*/
         seeds = Box::new(seeds.map(move |x| ma.get(x)));
     }
+    /*let s: Vec<_> = seeds.collect();
+    println!("{s:?}");
+    seeds = Box::new(s.into_iter());*/
     //if !proceed() {return}
     println!("{:?}", ProgressWrapper::new(seeds, total_seeds).min());
 }
