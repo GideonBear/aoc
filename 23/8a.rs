@@ -33,10 +33,10 @@ fn main() {
 
     let mut curr = "AAA";
     let end = "ZZZ";
-    let mut i = 0;
+    let mut i: u32 = 0;
     while curr != end {
         i += 1;
-        curr = nodes[curr][directions.next().unwrap()]
+        curr = nodes[curr][directions.next().unwrap()];
     }
     println!("{i}");
 }
