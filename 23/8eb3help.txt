@@ -1,0 +1,12 @@
+XX (A)
+XX
+XO
+OX (start, largest_dist_to_end=3)
+XX
+XO
+XX
+OX
+XO
+XX
+XX
+OO (8 + 3 = 11)
