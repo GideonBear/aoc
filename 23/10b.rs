@@ -55,8 +55,30 @@ fn neg_vec(vec: &(isize, isize)) -> (isize, isize) {
     (-vec.0, -vec.1)
 }
 
-fn num_enclosed<T>(grid: &Grid<T>, in_loop: impl Iterator<Item = (usize, usize)>) -> usize {
-    todo!()
+fn num_enclosed(grid: &Grid<PipeVector>, in_loop: impl Iterator<Item = (usize, usize)>) -> usize {
+    grid
+        .indexed_iter()
+        .map(|(coords, _item)| coords)
+        .filter(|&coords| {
+            if grid[coords] != PipeVector::Ground { false }
+            else {
+                // TODO: connected pipes should be skipped somehow? See 8, 9 in eb1
+                let (row, col) = coords;
+                let mut inside = false;
+                println!("Trying {row}, {col}");
+                for i in 0..row {
+                    println!("It {i}, {col}");
+                    if let PipeVector::Vectors(_, _) = grid[(i, col)] {
+                        println!("Found pipe, flipping inside");
+                        inside = !inside;
+                    }
+                }
+                println!("inside={inside}");
+                inside
+            }
+        })
+        .map(|_| 1)
+        .sum()
 }
 
 fn main() {
