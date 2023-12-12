@@ -1,6 +1,7 @@
 //! ```cargo
 //! [dependencies]
 //! itertools = "0.12.0"
+//! tqdm = "0.6.0"
 //! ```
 
 #![feature(anonymous_lifetime_in_impl_trait)]
@@ -9,6 +10,7 @@
 use std::fs;
 use itertools::Itertools;
 use std::iter::repeat;
+use tqdm::tqdm;
 
 const FT: &[bool; 2] = &[false, true];
 
@@ -98,7 +100,7 @@ fn main() {
             let num_unknown = row.iter().filter(|&&x| x == SpringInfo::Unknown).count();
             println!("{num_unknown} unknown springs");
             let mut diff_arrs = 0;
-            for t in repeat(FT).take(num_unknown).multi_cartesian_product() {
+            for t in tqdm(repeat(FT).take(num_unknown).multi_cartesian_product()) {
                 // let mut stop = false;
                 // println!("{t:?}");
                 // println!("{row:?}");
