@@ -55,38 +55,71 @@ fn neg_vec(vec: &(isize, isize)) -> (isize, isize) {
     (-vec.0, -vec.1)
 }
 
-fn num_enclosed(grid: &Grid<PipeVector>, in_loop: impl Iterator<Item = (usize, usize)>) -> usize {
+fn num_enclosed(grid: &Grid<PipeVector>, in_loop: Vec<(usize, usize)>) -> usize {
     grid
         .indexed_iter()
         .map(|(coords, _item)| coords)
         .filter(|&coords| {
-            if grid[coords] != PipeVector::Ground { false }
+            if in_loop.contains(&coords) { false }
             else {
-                // TODO: connected pipes should be skipped somehow? See 8, 9 in eb1
                 let (row, col) = coords;
                 let mut inside = false;
+                let mut last_lr_vec = None;
                 println!("Trying {row}, {col}");
                 for i in 0..row {
+                    if !in_loop.contains(&(i, col)) {
+                        continue
+                    }
                     println!("It {i}, {col}");
-                    if let PipeVector::Vectors(_, _) = grid[(i, col)] {
-                        println!("Found pipe, flipping inside");
-                        inside = !inside;
+                    if let PipeVector::Start = grid[(i, col)] {
+                        panic!();
+                    }
+                    if let PipeVector::Vectors(mut vec1, mut vec2) = grid[(i, col)] {
+                        if (vec1 == EAST || vec1 == WEST) && vec2 != WEST {
+                            println!("FLIPPING (ONLY ON START!!)");
+                            (vec1, vec2) = (vec2, vec1);
+                        }
+                        println!("{vec1:?}, {vec2:?}");
+                        if vec1 == EAST && vec2 == WEST {
+                            println!("Found east-west pipe, flipping inside");
+                            inside = !inside;
+                        } else if vec2 == EAST || vec2 == WEST {
+                            match last_lr_vec{
+                                Some(x) if x == neg_vec(&vec2) => {
+                                    println!("Found neg_vec(vec2) == last_lr_vec, flipping inside");
+                                    inside = !inside;
+                                    last_lr_vec = None;
+                                }
+                                Some(x) => {
+                                    println!("Resetting last_lr_vec");
+                                    assert_eq!(vec2, x, "vec2 should be the same as last_lr_vec");
+                                    last_lr_vec = None;
+                                }
+                                None => {
+                                    println!("Setting last_lr_vec");
+                                    last_lr_vec = Some(vec2);
+                                }
+                            }
+                        } else {
+                            println!("North-South pipe found");
+                        }
+                    } else {
+                        println!("{:?} is not a Vectors", grid[(i, col)]);
                     }
                 }
                 println!("inside={inside}");
                 inside
             }
         })
-        .map(|_| 1)
-        .sum()
+        .count()
 }
 
 fn main() {
-    let text = fs::read_to_string("10eb1.txt").expect("Error while reading file");
+    let text = fs::read_to_string("10.txt").expect("Error while reading file");
 
     let mut lines = text.split('\n').peekable();
     let width = lines.peek().unwrap().len();
-    let grid = Grid::from_vec(
+    let mut grid = Grid::from_vec(
         lines.join("").chars().map(PipeVector::new).collect(), width
     );
 
@@ -98,6 +131,7 @@ fn main() {
     let mut last_vec = (0, 0);
     let mut starting_vecs_done = vec![];
     let mut dist = 0;
+    let mut start_connections = vec![];
     loop {
         in_loop.entry(curr).and_modify(|old_dist| *old_dist = dist.min(*old_dist)).or_insert(dist);
         if in_loop.contains_key(&curr) {
@@ -128,6 +162,9 @@ fn main() {
                                         last_vec = vec;
                                         dist += 1;
                                         done = false;
+                                        start_connections.push(
+                                            if vec1 == neg_vec(&vec) { neg_vec(&vec1) } else { neg_vec(&vec2) }
+                                        );
                                         break;
                                     }
                                     println!("Neither vec ({vec1:?}, {vec2:?}) matching neg vec ({vec:?}), trying next");
@@ -168,7 +205,18 @@ fn main() {
         }
     }
 
+    println!("start_connections={start_connections:?}");
+    let mut done = false;
+    for coords in in_loop.keys() {
+        if let PipeVector::Start = grid[*coords] {
+            grid[*coords] = PipeVector::Vectors(start_connections[0], start_connections[1]);
+            done = true;
+            break;
+        }
+    }
+    assert!(done);
+
     println!("{in_loop:?}");
-    let answer = num_enclosed(&grid, in_loop.into_keys());
+    let answer = num_enclosed(&grid, in_loop.into_keys().collect());
     println!("{answer:?}");
 }
