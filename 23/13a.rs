@@ -19,7 +19,7 @@ fn parse_char(c: char) -> bool {
 fn find_mirrors(grid: &Grid<bool>) -> Vec<usize> {
     let mut mirrors = vec![];
     for mirror in 1..grid.rows() {
-        let mut rows: Vec<Vec<_>> = grid.iter_rows().map(|x| x.collect()).collect();
+        let rows: Vec<Vec<_>> = grid.iter_rows().map(|x| x.collect()).collect();
         let mut front = rows[..mirror].to_vec();
         let mut back = rows[mirror..].to_vec();
         if front.len() > back.len() {
