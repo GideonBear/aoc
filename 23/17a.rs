@@ -5,6 +5,8 @@
 //! tqdm = "0.6.0"
 //! ```
 
+#![feature(iter_collect_into)]
+
 use std::fs;
 use grid::*;
 // use std::collections::{HashSet, VecDeque};
@@ -18,6 +20,7 @@ const NORTH: Vector = (-1, 0);
 const SOUTH: Vector = (1, 0);
 const EAST: Vector = (0, 1);
 const WEST: Vector = (0, -1);
+const DIRS: [Vector; 4] = [NORTH, SOUTH, EAST, WEST];
 
 fn add_vec<T>(grid: &Grid<T>, (c1, c2): Coords, (v1, v2): Vector) -> Option<Coords> {
     let n1 = isize::try_from(c1).unwrap() + v1;
@@ -36,9 +39,10 @@ fn add_vec<T>(grid: &Grid<T>, (c1, c2): Coords, (v1, v2): Vector) -> Option<Coor
     }
 }
 
+#[derive(Debug)]
 struct Graph {
     nodes: Vec<Node>,
-    start: Box<Node>,
+    start: usize,
 }
 
 impl Graph {
@@ -47,26 +51,52 @@ impl Graph {
         let mut start = Node::from_grid(&mut nodes, &grid, start_coords);
         Self {
             nodes,
-            start: Box::new(start),
+            start,
         }
     }
 }
 
+#[derive(Debug)]
 struct Node {
     coords: Coords,
-    edges: Vec<(u8, Vector, Box<Node>)>,
+    edges: Vec<(u8, Vector, usize)>,
 }
 
 impl Node {
-    fn new(coords: Coords) -> Self {
-        Self {
+    fn from_grid(nodes: &mut Vec<Node>, grid: &Grid<u8>, coords: Coords) -> usize {
+        // TODO: make non-recursive
+        let mut node = Self {
             coords,
             edges: vec![],
-        }
-    }
-
-    fn from_grid(nodes: &mut Vec<Node>, grid: &Grid<u8>, coords: Coords) -> Self {
-        todo!();
+        };
+        nodes.push(node);
+        let pos = nodes.len() - 1;
+        let edges = DIRS
+            .iter()
+            .enumerate().map(|(i, x)| { println!("{i}: {x:?}"); x })
+            .map(|&dir| match add_vec(grid, coords, dir) {
+                Some(new_coords) => {
+                    if nodes.iter().any(|x| x.coords == new_coords) {
+                        println!("Node with those coords ({new_coords:?}) already in nodes, skipping");
+                        // TODO: In this case the edge should be added, just without creating a new Node
+                        None
+                    } else {
+                        println!("Found new node via dir {dir:?} at {coords:?})");
+                        let new_val = grid[new_coords];
+                        Some((
+                            new_val,
+                            dir,
+                            Self::from_grid(nodes, grid, new_coords),
+                        ))
+                    }
+                }
+                None => None,
+            })
+            // .filter(|x| x.is_some()).map(|x| x.unwrap())
+            .flatten()
+            .collect();
+        nodes[pos].edges = edges;
+        pos
     }
 }
 
