@@ -42,15 +42,19 @@ struct Graph {
 }
 
 impl Graph {
-    fn from_grid(grid: Grid<u8>, coords: Coords) -> Self {
-        let mut start_node = Self::new(grid[coords]);
-        todo!();
+    fn from_grid(grid: &Grid<u8>, start_coords: Coords) -> Self {
+        let mut nodes = vec![];
+        let mut start = Node::from_grid(&mut nodes, &grid, start_coords);
+        Self {
+            nodes,
+            start: Box::new(start),
+        }
     }
 }
 
 struct Node {
     coords: Coords,
-    edges: Vec<(u8, Box<Node>)>,
+    edges: Vec<(u8, Vector, Box<Node>)>,
 }
 
 impl Node {
@@ -61,7 +65,7 @@ impl Node {
         }
     }
 
-    fn from_grid(graph: Graph, grid: Grid<u8>, coords: Coords) -> Self {
+    fn from_grid(nodes: &mut Vec<Node>, grid: &Grid<u8>, coords: Coords) -> Self {
         todo!();
     }
 }
@@ -78,6 +82,6 @@ fn main() {
     let start = (0, 0);
     let end = (grid.rows() - 1, grid.cols() - 1);
     let max_straight_line = 3;
-    let graph = Graph::from_grid(grid, start);
+    let graph = Graph::from_grid(&grid, start);
     // TODO: somehow do the three straight moves rule
 }
