@@ -41,10 +41,10 @@ fn mult_vec((v1, v2): Vector, x: isize) -> Vector {
 
 fn parse_dir(s: &str) -> Vector {
     match s {
-        "U" => NORTH,
-        "D" => SOUTH,
-        "R" => EAST,
-        "L" => WEST,
+        "0" => EAST,
+        "1" => SOUTH,
+        "2" => WEST,
+        "3" => NORTH,
         _ => panic!(),
     }
 }
@@ -85,16 +85,16 @@ fn num_enclosed(grid: &Grid<bool>) -> usize {
 }
 
 fn main() {
-    let text = fs::read_to_string("18.txt").expect("Error while reading file");
+    let text = fs::read_to_string("18e.txt").expect("Error while reading file");
 
     let steps = text
         .split('\n')
         .map(|line| line.split(' ').collect_tuple().unwrap())
         .map(|(dir, len, color)| {
+            let color = color.strip_prefix("(#").unwrap().strip_suffix(')').unwrap();
             (
-                parse_dir(dir),
-                len.parse::<usize>().unwrap(),
-                color.strip_prefix("(#").unwrap().strip_suffix(')').unwrap(),
+                parse_dir(&color[color.len() - 1..]),
+                usize::from_str_radix(&color[..color.len() - 1], 16).unwrap(),
             )
         });
 
@@ -103,7 +103,7 @@ fn main() {
     grid[start] = true;
 
     let mut curr = start;
-    for (i, (dir, len, color)) in steps.enumerate() {
+    for (i, (dir, len)) in steps.enumerate() {
         println!("Step {i}");
         for i in 0..len {
             curr = add_vec(&grid, curr, dir).expect("Instructions incorrect");
