@@ -66,7 +66,7 @@ impl Graph {
         let nodes_coords = nodes.iter().map(|x| x.coords).collect::<Vec<_>>();
 
         // Populate edges
-        for node in nodes.iter_mut() {
+        for node in &mut nodes {
             DIRS
                 .iter()
                 .map(|&dir| match add_vec(grid, node.coords, dir) {
@@ -114,5 +114,68 @@ fn main() {
     let end = (grid.rows() - 1, grid.cols() - 1);
     let max_straight_line = 3;
     let graph = Graph::from_grid(&grid, start);
-    // TODO: somehow do the three straight moves rule
+
+    let mut todo = vec![(
+        graph.start, // node_i
+        vec![],      // traversed_nodes (start heat loss doesn't count)
+        0,           // traversed_dist  (start heat loss doesn't count)
+        0,           // straight_moved
+        NORTH        // last_dir (guaranteed not to be the next dir (must be SOUTH or EAST))
+    )];
+    let mut best = std::collections::HashMap::new();
+    while !todo.is_empty() {
+        println!("Todo: {}", todo.len());
+        let (node_i, traversed_nodes, traversed_dist, straight_moved, last_dir) = todo.pop().unwrap();
+        let node = &graph.nodes[node_i];
+        for &(dist, dir, new_node_i) in &node.edges {
+            // println!("Trying {dist:?}, {dir:?}, {new_node_i:?}");
+            if traversed_nodes.contains(&new_node_i) {
+                // Assuming that it's never a good idea to walk on a node that's already walked
+                // (which might be wrong)
+                // println!("  - Node already traversed");
+                continue;
+            }
+            let new_traversed_dist = traversed_dist + dist;
+            match best.get(&(new_node_i, dir, straight_moved)) {
+                Some(&x) if x > new_traversed_dist => {
+                    // println!("New min for {new_node_i:?}");
+                    best.insert((new_node_i, dir, straight_moved), new_traversed_dist);
+                }
+                Some(&x) => {
+                    // println!("Is superseded");
+                    continue;
+                }
+                None => {
+                    // println!("New max (no previous) for {new_node_i:?}");
+                    best.insert((new_node_i, dir, straight_moved), new_traversed_dist);
+                }
+            }
+            let mut new_traversed_nodes = traversed_nodes.clone();
+            new_traversed_nodes.push(new_node_i);
+            let new_straight_moved = if dir == last_dir {
+                // println!("  - Moved next straight");
+                if straight_moved == max_straight_line {
+                    // println!("    - Moved three straight");
+                    continue;
+                }
+                straight_moved + 1
+            } else {
+                0
+            };
+            todo.push((
+                new_node_i,
+                new_traversed_nodes,
+                new_traversed_dist,
+                new_straight_moved,
+                dir,
+            ));
+        }
+    }
+
+    let best_route = best
+        .into_iter()
+        .filter(|((k, dir, straight_moved), v)| graph.nodes[*k].coords == end)
+        .min_by_key(|((k, dir, straight_moved), v)| v.clone()).expect("End missing");
+    println!("{:?}", best_route);
+    println!("{:?}", best_route.1);
 }
