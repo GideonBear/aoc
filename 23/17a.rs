@@ -39,16 +39,55 @@ fn add_vec<T>(grid: &Grid<T>, (c1, c2): Coords, (v1, v2): Vector) -> Option<Coor
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 struct Graph {
     nodes: Vec<Node>,
     start: usize,
 }
 
 impl Graph {
+    fn get_node(nodes: &Vec<Coords>, coords: Coords) -> usize {
+        nodes
+            .iter()
+            .position(|&x| x == coords)
+            .expect("Node at {coords:?} doesn't exist in {nodes:?}")
+    }
+
     fn from_grid(grid: &Grid<u8>, start_coords: Coords) -> Self {
         let mut nodes = vec![];
-        let mut start = Node::from_grid(&mut nodes, &grid, start_coords);
+
+        // Add all nodes with empty edges
+        for (coords, val) in grid.indexed_iter() {
+            nodes.push(Node {
+                coords,
+                edges: vec![]
+            })
+        }
+        let nodes_coords = nodes.iter().map(|x| x.coords).collect::<Vec<_>>();
+
+        // Populate edges
+        for node in nodes.iter_mut() {
+            DIRS
+                .iter()
+                .map(|&dir| match add_vec(grid, node.coords, dir) {
+                    Some(new_coords) => {
+                        println!("Found new node via dir {dir:?} at {:?}: {new_coords:?}", node.coords);
+                        let new_val = grid[new_coords];
+                        Some((
+                            new_val,
+                            dir,
+                            Self::get_node(&nodes_coords, new_coords),
+                        ))
+                    }
+                    None => None,
+                })
+                // .filter(|x| x.is_some()).map(|x| x.unwrap())
+                .flatten()
+                .collect_into(&mut node.edges);
+        }
+
+        let start = Self::get_node(&nodes_coords, start_coords);
+
         Self {
             nodes,
             start,
@@ -56,52 +95,14 @@ impl Graph {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 struct Node {
     coords: Coords,
     edges: Vec<(u8, Vector, usize)>,
 }
 
-impl Node {
-    fn from_grid(nodes: &mut Vec<Node>, grid: &Grid<u8>, coords: Coords) -> usize {
-        // TODO: make non-recursive
-        let mut node = Self {
-            coords,
-            edges: vec![],
-        };
-        nodes.push(node);
-        let pos = nodes.len() - 1;
-        let edges = DIRS
-            .iter()
-            .enumerate().map(|(i, x)| { println!("{i}: {x:?}"); x })
-            .map(|&dir| match add_vec(grid, coords, dir) {
-                Some(new_coords) => {
-                    if nodes.iter().any(|x| x.coords == new_coords) {
-                        println!("Node with those coords ({new_coords:?}) already in nodes, skipping");
-                        // TODO: In this case the edge should be added, just without creating a new Node
-                        None
-                    } else {
-                        println!("Found new node via dir {dir:?} at {coords:?})");
-                        let new_val = grid[new_coords];
-                        Some((
-                            new_val,
-                            dir,
-                            Self::from_grid(nodes, grid, new_coords),
-                        ))
-                    }
-                }
-                None => None,
-            })
-            // .filter(|x| x.is_some()).map(|x| x.unwrap())
-            .flatten()
-            .collect();
-        nodes[pos].edges = edges;
-        pos
-    }
-}
-
 fn main() {
-    let text = fs::read_to_string("17.txt").expect("Error while reading file");
+    let text = fs::read_to_string("17e.txt").expect("Error while reading file");
 
     let mut lines = text.split('\n').peekable();
     let width = lines.peek().unwrap().len();
