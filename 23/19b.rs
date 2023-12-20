@@ -7,6 +7,7 @@
 use std::fs;
 use std::collections::HashMap;
 use itertools::Itertools;
+use std::ops::Range;
 
 #[derive(PartialEq, Eq, Hash, Debug, Clone, Copy)]
 enum Cat {
@@ -66,8 +67,19 @@ impl From<&str> for Condition {
 }
 
 impl Condition {
-    fn apply(&self, part: &Part) -> bool {
-        self.op.apply(part.ratings[&self.cat], self.val)
+    fn apply(&self, part: &Part) -> (Part, Part) {
+        // self.op.apply(part.ratings[&self.cat], self.val)
+        let range = &part.ratings[&self.cat];
+        let small_part_range = range.start .. self.val;
+        let big_part_range = self.val .. range.end;
+        let mut small_part = Part { ratings: part.ratings.clone() };
+        let mut big_part = Part { ratings: part.ratings.clone() };
+        small_part.ratings.insert(self.cat, small_part_range);
+        big_part.ratings.insert(self.cat, big_part_range);
+        match self.op {
+            Op::LT => (small_part, big_part),
+            Op::GT => (big_part, small_part),
+        }
     }
 }
 
@@ -83,15 +95,6 @@ impl From<char> for Op {
             '<' => Self::LT,
             '>' => Self::GT,
             _ => panic!(),
-        }
-    }
-}
-
-impl Op {
-    fn apply<T: std::cmp::Ord>(&self, a: T, b: T) -> bool {
-        match self {
-            Self::LT => a < b,
-            Self::GT => a > b,
         }
     }
 }
@@ -115,57 +118,63 @@ impl From<&str> for SendTo {
 
 #[derive(Debug)]
 struct Part {
-    ratings: HashMap<Cat, u32>,
+    ratings: HashMap<Cat, Range<u32>>,
 }
 
-impl From<&str> for Part {
-    fn from(s: &str) -> Self {
-        let s = s.strip_prefix('{').unwrap().strip_suffix('}').unwrap();
+impl Part {
+    fn new() -> Self {
         Self {
-            ratings: s
-                .split(',')
-                .map(|r| {
-                    let mut it = r.chars();
-                    let cat = it.next().unwrap().into();
-                    it.next();
-                    let val = it.collect::<String>().parse().unwrap();
-                    (cat, val)
-                })
-                .collect()
+            ratings: HashMap::from([
+                (Cat::X, 1..4001),
+                (Cat::M, 1..4001),
+                (Cat::A, 1..4001),
+                (Cat::S, 1..4001),
+            ])
         }
     }
-}
 
-fn process_part(part: &Part, workflows: &HashMap<String, Workflow>, workflow_in: &Workflow) -> bool {
-    let mut curr = workflow_in;
-    loop {
-        let mut send_to = &curr.fallback;
-        for (condition, this_send_to) in &curr.rules {
-            if condition.apply(part) {
-                send_to = this_send_to;
-                break;
-            }
-        }
-        match send_to {
-            SendTo::Accept => return true,
-            SendTo::Reject => return false,
-            SendTo::Workflow(wf) => curr = &workflows[wf],
-        }
+    fn combs(&self) -> u128 {
+        println!("{self:?}");
+        println!("{}", self
+            .ratings
+            .values()
+            .map(|x| u128::try_from(x.len()).unwrap())
+            .product::<u128>());
+        self
+            .ratings
+            .values()
+            .map(|x| u128::try_from(x.len()).unwrap())
+            .product()
     }
 }
 
 fn main() {
     let text = fs::read_to_string("19.txt").expect("Error while reading file");
 
-    let (workflows, parts) = text.split("\n\n").collect_tuple().unwrap();
+    let (workflows, _parts) = text.split("\n\n").collect_tuple().unwrap();
     let workflows: HashMap<String, Workflow> = workflows.split('\n').map(Workflow::from_string).collect();
-    let workflow_in = &workflows["in"];
-    let parts = parts.split('\n').map(Part::from);
+    // let workflow_in = &workflows["in"];
+    let full_part = Part::new();
 
-    let result = parts
-        .filter(|part| process_part(part, &workflows, workflow_in))
-        .map(|part| part.ratings.into_values().sum::<u32>())
-        .sum::<u32>();
+    let mut total = 0;
+    let send_to_in = SendTo::Workflow("in".to_string());
+    let mut todo = vec![(full_part, &send_to_in)];
+    while !todo.is_empty() {
+        let (mut part, send_to) = todo.pop().unwrap();
+        match send_to {
+            SendTo::Accept => total += part.combs(),
+            SendTo::Reject => (),
+            SendTo::Workflow(s) => {
+                let workflow = &workflows[s];
+                for (condition, this_send_to) in &workflow.rules {
+                    let (accepted, rejected) = condition.apply(&part);
+                    todo.push((accepted, this_send_to));
+                    part = rejected;
+                }
+                todo.push((part, &workflow.fallback));
+            }
+        }
+    }
 
-    println!("{result}");
+    println!("{total}");
 }
