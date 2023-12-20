@@ -70,8 +70,9 @@ impl Condition {
     fn apply(&self, part: &Part) -> (Part, Part) {
         // self.op.apply(part.ratings[&self.cat], self.val)
         let range = &part.ratings[&self.cat];
-        let small_part_range = range.start .. self.val;
-        let big_part_range = self.val .. range.end;
+        let add = if let Op::GT = self.op { 1 } else { 0 };
+        let small_part_range = range.start .. self.val + add;
+        let big_part_range = self.val + add .. range.end;
         let mut small_part = Part { ratings: part.ratings.clone() };
         let mut big_part = Part { ratings: part.ratings.clone() };
         small_part.ratings.insert(self.cat, small_part_range);
@@ -134,12 +135,12 @@ impl Part {
     }
 
     fn combs(&self) -> u128 {
-        println!("{self:?}");
-        println!("{}", self
-            .ratings
-            .values()
-            .map(|x| u128::try_from(x.len()).unwrap())
-            .product::<u128>());
+        println!("Accepted {self:?}");
+        // println!("{}", self
+        //     .ratings
+        //     .values()
+        //     .map(|x| u128::try_from(x.len()).unwrap())
+        //     .product::<u128>());
         self
             .ratings
             .values()
@@ -165,12 +166,15 @@ fn main() {
             SendTo::Accept => total += part.combs(),
             SendTo::Reject => (),
             SendTo::Workflow(s) => {
+                println!("Going through workflow {s}");
                 let workflow = &workflows[s];
                 for (condition, this_send_to) in &workflow.rules {
+                    println!("- {this_send_to:?} : {condition:?}");
                     let (accepted, rejected) = condition.apply(&part);
                     todo.push((accepted, this_send_to));
                     part = rejected;
                 }
+                println!("- {:?} : fallback", workflow.fallback);
                 todo.push((part, &workflow.fallback));
             }
         }
