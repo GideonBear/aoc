@@ -10,7 +10,7 @@ text = r'''
 use std::fs;
 
 fn main() {{
-    let text = fs::read_to_string("7.txt").unwrap();
+    let text = fs::read_to_string("{}.txt").unwrap();
     let text = text
         .strip_suffix('\n')
         .unwrap_or(&text);
