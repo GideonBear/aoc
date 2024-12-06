@@ -18,16 +18,14 @@ pub fn part_one(input: &str) -> Option<u32> {
     l1.sort();
     l2.sort();
     Some(
-        l1
-            .into_iter()
+        l1.into_iter()
             .zip(l2)
             .map(|(v1, v2)| (v1 - v2).unsigned_abs() as u32)
-            .sum()
+            .sum(),
     )
 }
 
 pub fn part_two(input: &str) -> Option<u32> {
-
     let mut l1: Vec<usize> = vec![];
     let mut l2: Vec<usize> = vec![];
     for line in input.split("\n") {

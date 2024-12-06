@@ -1,5 +1,5 @@
-use std::ops::{Add, AddAssign, Not};
 use grid::Grid;
+use std::ops::{Add, AddAssign, Not};
 
 pub mod template;
 
