@@ -19,6 +19,10 @@ impl Coord {
     pub fn get<'a, T>(&self, grid: &'a Grid<T>) -> Option<&'a T> {
         grid.get(self.0, self.1)
     }
+    
+    pub fn val(&self) -> (usize, usize) {
+        (usize::try_from(self.0).unwrap(), usize::try_from(self.1).unwrap())
+    }
 }
 
 #[derive(Debug, PartialEq, Copy, Clone)]
@@ -48,7 +52,7 @@ impl AddAssign<Vector> for Coord {
 
 impl Vector {
     pub fn get_ortho() -> impl Iterator<Item = Vector> {
-        [Vector(0, 1), Vector(0, -1), Vector(1, 0), Vector(-1, 0)].into_iter()
+        [Self::up(), Self::right(), Self::down(), Self::left()].into_iter()
     }
 
     pub fn get_diagonal() -> impl Iterator<Item = Vector> {
@@ -57,5 +61,31 @@ impl Vector {
 
     pub fn get_ortho_diagonal() -> impl IntoIterator<Item = Vector> {
         Self::get_ortho().chain(Self::get_diagonal())
+    }
+    
+    pub fn up() -> Self {
+        Self(-1, 0)
+    }
+
+    pub fn down() -> Self {
+        Self(1, 0)
+    }
+
+    pub fn right() -> Self {
+        Self(0, 1)
+    }
+
+    pub fn left() -> Self {
+        Self(0, -1)
+    }
+    
+    pub fn turn_90(self) -> Self {
+        match self {
+            Vector(-1, 0) => Self::right(),
+            Vector(0, 1) => Self::down(),
+            Vector(1, 0) => Self::left(),
+            Vector(0, -1) => Self::up(),
+            _ => panic!(),
+        }
     }
 }
