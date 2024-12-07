@@ -1,6 +1,6 @@
+use advent_of_code::{Coord, Vector};
 use grid::Grid;
 use itertools::Itertools;
-use advent_of_code::{Coord, Vector};
 
 advent_of_code::solution!(6);
 
@@ -25,9 +25,12 @@ impl Space {
 pub fn part_one(input: &str) -> Option<u32> {
     let mut lines = input.split('\n').peekable();
     let width = lines.peek().unwrap().len();
-    let mut grid = Grid::from_vec(lines.join("").chars().map(Space::from_char).collect(), width);
-    
-    fn step(grid: &mut Grid<Space>) -> bool{
+    let mut grid = Grid::from_vec(
+        lines.join("").chars().map(Space::from_char).collect(),
+        width,
+    );
+
+    fn step(grid: &mut Grid<Space>) -> bool {
         let ((i, j), g) = grid
             .indexed_iter()
             .find(|((i, j), x)| matches!(x, Space::Guard(_)))
@@ -59,14 +62,21 @@ pub fn part_one(input: &str) -> Option<u32> {
     }
 
     while step(&mut grid) {}
-    Some(grid.iter().filter(|x| matches!(x, Space::Empty(true))).count() as u32)
+    Some(
+        grid.iter()
+            .filter(|x| matches!(x, Space::Empty(true)))
+            .count() as u32,
+    )
 }
 
 pub fn part_two(input: &str) -> Option<u32> {
     let mut lines = input.split('\n').peekable();
     let width = lines.peek().unwrap().len();
-    let mut grid = Grid::from_vec(lines.join("").chars().map(Space::from_char).collect(), width);
-    fn step(grid: &mut Grid<Space>) -> bool{
+    let mut grid = Grid::from_vec(
+        lines.join("").chars().map(Space::from_char).collect(),
+        width,
+    );
+    fn step(grid: &mut Grid<Space>) -> bool {
         let ((i, j), g) = grid
             .indexed_iter()
             .find(|((i, j), x)| matches!(x, Space::Guard(_)))
@@ -96,7 +106,7 @@ pub fn part_two(input: &str) -> Option<u32> {
         }
         true
     }
-    
+
     let orig_grid = grid.clone();
 
     while step(&mut grid) {}
@@ -107,7 +117,9 @@ pub fn part_two(input: &str) -> Option<u32> {
     let mut count = 0;
 
     for ((i, j), x) in visited {
-        if !matches!(x, Space::Empty(_)) { continue }
+        if !matches!(x, Space::Empty(_)) {
+            continue;
+        }
         println!("{i},{j}");
 
         let mut new_grid = orig_grid.clone();

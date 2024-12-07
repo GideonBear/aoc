@@ -19,9 +19,12 @@ impl Coord {
     pub fn get<'a, T>(&self, grid: &'a Grid<T>) -> Option<&'a T> {
         grid.get(self.0, self.1)
     }
-    
+
     pub fn val(&self) -> (usize, usize) {
-        (usize::try_from(self.0).unwrap(), usize::try_from(self.1).unwrap())
+        (
+            usize::try_from(self.0).unwrap(),
+            usize::try_from(self.1).unwrap(),
+        )
     }
 }
 
@@ -62,7 +65,7 @@ impl Vector {
     pub fn get_ortho_diagonal() -> impl IntoIterator<Item = Vector> {
         Self::get_ortho().chain(Self::get_diagonal())
     }
-    
+
     pub fn up() -> Self {
         Self(-1, 0)
     }
@@ -78,7 +81,7 @@ impl Vector {
     pub fn left() -> Self {
         Self(0, -1)
     }
-    
+
     pub fn turn_90(self) -> Self {
         match self {
             Vector(-1, 0) => Self::right(),
