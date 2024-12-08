@@ -20,7 +20,12 @@ pub fn part_one(input: &str) -> Option<u64> {
             .filter_map(|(value, operands)| {
                 let first = *operands.first().unwrap();
                 let choices = operands.len() - 1;
-                assert_eq!(2_u64.pow(choices as u32), repeat_n(['*', '+'].into_iter(), choices).multi_cartesian_product().count() as u64);
+                assert_eq!(
+                    2_u64.pow(choices as u32),
+                    repeat_n(['*', '+'].into_iter(), choices)
+                        .multi_cartesian_product()
+                        .count() as u64
+                );
                 // dbg!(repeat_n(['*', '+'].into_iter(), choices).multi_cartesian_product().collect::<Vec<_>>());
                 for permutation in
                     repeat_n(['*', '+'].into_iter(), choices).multi_cartesian_product()
@@ -60,7 +65,12 @@ pub fn part_two(input: &str) -> Option<u64> {
             .filter_map(|(value, operands)| {
                 let first = *operands.first().unwrap();
                 let choices = operands.len() - 1;
-                assert_eq!(3_u64.pow(choices as u32), repeat_n(['*', '+', '|'].into_iter(), choices).multi_cartesian_product().count() as u64);
+                assert_eq!(
+                    3_u64.pow(choices as u32),
+                    repeat_n(['*', '+', '|'].into_iter(), choices)
+                        .multi_cartesian_product()
+                        .count() as u64
+                );
                 // dbg!(repeat_n(['*', '+'].into_iter(), choices).multi_cartesian_product().collect::<Vec<_>>());
                 for permutation in
                     repeat_n(['*', '+', '|'].into_iter(), choices).multi_cartesian_product()
