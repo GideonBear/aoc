@@ -5,10 +5,14 @@ pub mod template;
 
 // Use this file to add helper functions and additional modules.
 
-#[derive(Debug, PartialEq, Copy, Clone)]
+#[derive(Debug, PartialEq, Eq, Hash, Copy, Clone)]
 pub struct Coord(pub i32, pub i32);
 
 impl Coord {
+    pub fn try_new(x: impl TryInto<i32>, y: impl TryInto<i32>) -> Option<Self> {
+        Some(Self(x.try_into().ok()?, y.try_into().ok()?))
+    }
+
     pub fn in_bound<T>(&self, grid: &Grid<T>) -> bool {
         self.0 >= 0
             && self.1 >= 0
@@ -26,9 +30,13 @@ impl Coord {
             usize::try_from(self.1).unwrap(),
         )
     }
+
+    pub fn vector_to(&self, other: Self) -> Vector {
+        Vector(other.0 - self.0, other.1 - self.1)
+    }
 }
 
-#[derive(Debug, PartialEq, Copy, Clone)]
+#[derive(Debug, PartialEq, Eq, Hash, Copy, Clone)]
 pub struct Vector(pub i32, pub i32);
 
 impl Not for Vector {
@@ -90,5 +98,21 @@ impl Vector {
             Vector(0, -1) => Self::up(),
             _ => panic!(),
         }
+    }
+}
+
+pub trait IndexedIterCoord<T> {
+    fn indexed_iter_coord<'a>(&'a self) -> impl Iterator<Item = (Coord, &'a T)>
+    where
+        T: 'a;
+}
+
+impl<T> IndexedIterCoord<T> for Grid<T> {
+    fn indexed_iter_coord<'a>(&'a self) -> impl Iterator<Item = (Coord, &'a T)>
+    where
+        T: 'a,
+    {
+        self.indexed_iter()
+            .map(|((i, j), x)| (Coord::try_new(i, j).unwrap(), x))
     }
 }
