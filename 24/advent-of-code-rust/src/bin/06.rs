@@ -122,8 +122,12 @@ pub fn part_two(input: &str) -> Option<u32> {
     let visited = visited.into_iter();
 
     for ((i, j), x) in visited {
-        if !matches!(x, Space::Empty(_)) { continue }
-        if matches!(orig_grid[(i, j)], Space::Guard(_)) { continue }
+        if !matches!(x, Space::Empty(_)) {
+            continue;
+        }
+        if matches!(orig_grid[(i, j)], Space::Guard(_)) {
+            continue;
+        }
         println!("{i},{j}");
 
         let mut new_grid = orig_grid.clone();
@@ -136,7 +140,7 @@ pub fn part_two(input: &str) -> Option<u32> {
                 .indexed_iter()
                 .find(|((_i, _j), x)| matches!(x, Space::Guard(_)))
                 .unwrap();
-            let guard = ((guard.0.0, guard.0.1), guard.1.clone());
+            let guard = ((guard.0 .0, guard.0 .1), guard.1.clone());
             if encountered_guards.contains(&guard) {
                 count += 1;
                 break;

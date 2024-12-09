@@ -11,19 +11,26 @@ fn get_antinodes(a: Coord, b: Coord) -> [Coord; 2] {
     [a + !vector, b + vector]
 }
 
-fn get_antinodes_part<T>(coord: Coord, vector: Vector, grid: &Grid<T>) -> impl Iterator<Item = Coord> + use<'_, T> {
-    repeat(vector)
-        .scan(coord, |state, vector| {
-            *state += vector;
-            if !state.in_bound(grid) {
-                None
-            } else {
-                Some(*state)
-            }
-        })
+fn get_antinodes_part<T>(
+    coord: Coord,
+    vector: Vector,
+    grid: &Grid<T>,
+) -> impl Iterator<Item = Coord> + use<'_, T> {
+    repeat(vector).scan(coord, |state, vector| {
+        *state += vector;
+        if !state.in_bound(grid) {
+            None
+        } else {
+            Some(*state)
+        }
+    })
 }
 
-fn get_antinodes_two<T>(a: Coord, b: Coord, grid: &Grid<T>) -> impl Iterator<Item = Coord> + use<'_, T> {
+fn get_antinodes_two<T>(
+    a: Coord,
+    b: Coord,
+    grid: &Grid<T>,
+) -> impl Iterator<Item = Coord> + use<'_, T> {
     let vector = a.vector_to(b);
     let vector_two = !vector;
     get_antinodes_part(a, vector, grid).chain(get_antinodes_part(b, vector_two, grid))
