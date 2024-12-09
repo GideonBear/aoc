@@ -4,7 +4,7 @@ use itertools::Itertools;
 
 advent_of_code::solution!(6);
 
-#[derive(PartialEq, Clone)]
+#[derive(PartialEq, Clone, Debug)]
 enum Space {
     Empty(bool),
     Guard(Vector),
@@ -33,7 +33,7 @@ pub fn part_one(input: &str) -> Option<u32> {
     fn step(grid: &mut Grid<Space>) -> bool {
         let ((i, j), g) = grid
             .indexed_iter()
-            .find(|((i, j), x)| matches!(x, Space::Guard(_)))
+            .find(|((_i, _j), x)| matches!(x, Space::Guard(_)))
             .unwrap();
         let coord = Coord(i as i32, j as i32);
         match g {
@@ -79,7 +79,7 @@ pub fn part_two(input: &str) -> Option<u32> {
     fn step(grid: &mut Grid<Space>) -> bool {
         let ((i, j), g) = grid
             .indexed_iter()
-            .find(|((i, j), x)| matches!(x, Space::Guard(_)))
+            .find(|((_i, _j), x)| matches!(x, Space::Guard(_)))
             .unwrap();
         let coord = Coord(i as i32, j as i32);
         match g {
@@ -112,25 +112,36 @@ pub fn part_two(input: &str) -> Option<u32> {
     while step(&mut grid) {}
     let visited = grid
         .indexed_iter()
-        .filter(|((i, j), x)| matches!(x, Space::Empty(true)));
+        .filter(|((_i, _j), x)| matches!(x, Space::Empty(true)));
 
     let mut count = 0;
 
+    let visited = visited.collect::<Vec<_>>();
+    // dbg!(&grid.indexed_iter().collect::<Vec<_>>());
+    // dbg!(&visited);
+    let visited = visited.into_iter();
+
     for ((i, j), x) in visited {
-        if !matches!(x, Space::Empty(_)) {
-            continue;
-        }
+        if !matches!(x, Space::Empty(_)) { continue }
+        if matches!(orig_grid[(i, j)], Space::Guard(_)) { continue }
         println!("{i},{j}");
 
         let mut new_grid = orig_grid.clone();
         new_grid[(i, j)] = Space::Obstruction;
-        let orig_new_grid = new_grid.clone();
+
+        let mut encountered_guards = vec![];
 
         while step(&mut new_grid) {
-            if new_grid == orig_new_grid {
+            let guard: ((usize, usize), &Space) = new_grid
+                .indexed_iter()
+                .find(|((_i, _j), x)| matches!(x, Space::Guard(_)))
+                .unwrap();
+            let guard = ((guard.0.0, guard.0.1), guard.1.clone());
+            if encountered_guards.contains(&guard) {
                 count += 1;
-                continue;
+                break;
             }
+            encountered_guards.push(guard);
         }
     }
     Some(count)
