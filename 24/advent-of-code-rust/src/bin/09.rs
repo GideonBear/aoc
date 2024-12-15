@@ -4,7 +4,14 @@ advent_of_code::solution!(9);
 
 pub fn part_one(input: &str) -> Option<u64> {
     let mut disk: Vec<Option<u64>> = vec![];
-    for (i, mut chunk) in input.to_string().chars().map(|x| x.to_string().parse().unwrap()).chunks(2).into_iter().enumerate() {
+    for (i, mut chunk) in input
+        .to_string()
+        .chars()
+        .map(|x| x.to_string().parse().unwrap())
+        .chunks(2)
+        .into_iter()
+        .enumerate()
+    {
         let file = chunk.next().unwrap();
         for _ in 0..file {
             disk.push(Some(i.try_into().unwrap()));
@@ -40,16 +47,24 @@ pub fn part_one(input: &str) -> Option<u64> {
         disk[value.0] = None;
     }
 
-    Some(disk
-        .into_iter()
-        .enumerate()
-        .filter_map(|(i, x)| x.map(|x| i as u64 * x))
-        .sum())
+    Some(
+        disk.into_iter()
+            .enumerate()
+            .filter_map(|(i, x)| x.map(|x| i as u64 * x))
+            .sum(),
+    )
 }
 
 pub fn part_two(input: &str) -> Option<u64> {
     let mut disk: Vec<Option<u64>> = vec![];
-    for (i, mut chunk) in input.to_string().chars().map(|x| x.to_string().parse().unwrap()).chunks(2).into_iter().enumerate() {
+    for (i, mut chunk) in input
+        .to_string()
+        .chars()
+        .map(|x| x.to_string().parse().unwrap())
+        .chunks(2)
+        .into_iter()
+        .enumerate()
+    {
         let file = chunk.next().unwrap();
         for _ in 0..file {
             disk.push(Some(i.try_into().unwrap()));
@@ -79,7 +94,12 @@ pub fn part_two(input: &str) -> Option<u64> {
             None => break,
             Some(x) => *x.1,
         };
-        let file: Vec<_> = disk.iter().copied().enumerate().filter(|(_i, x)| *x == value).collect();
+        let file: Vec<_> = disk
+            .iter()
+            .copied()
+            .enumerate()
+            .filter(|(_i, x)| *x == value)
+            .collect();
 
         let space = disk
             .iter()
@@ -96,7 +116,7 @@ pub fn part_two(input: &str) -> Option<u64> {
             None => {
                 tried.push(value.unwrap());
                 continue;
-            },
+            }
             Some(x) => x.into_iter().take(file.len()).collect(),
         };
 
@@ -112,19 +132,23 @@ pub fn part_two(input: &str) -> Option<u64> {
         }
     }
 
-    Some(disk
-        .into_iter()
-        .enumerate()
-        .filter_map(|(i, x)| x.map(|x| i as u64 * x))
-        .sum())
+    Some(
+        disk.into_iter()
+            .enumerate()
+            .filter_map(|(i, x)| x.map(|x| i as u64 * x))
+            .sum(),
+    )
 }
 
 fn print_disk(disk: &Vec<Option<u64>>) {
     for part in disk {
-        print!("{}", match part {
-            None => ".".to_string(),
-            Some(x) => x.to_string(),
-        });
+        print!(
+            "{}",
+            match part {
+                None => ".".to_string(),
+                Some(x) => x.to_string(),
+            }
+        );
     }
     println!();
 }
