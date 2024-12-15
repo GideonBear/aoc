@@ -1,3 +1,4 @@
+use std::fmt::Display;
 use grid::Grid;
 use std::ops::{Add, AddAssign, Not};
 
@@ -8,11 +9,13 @@ pub mod template;
 #[derive(Debug, PartialEq, Eq, Hash, Copy, Clone)]
 pub struct Coord(pub i32, pub i32);
 
-impl Coord {
-    pub fn try_new(x: impl TryInto<i32>, y: impl TryInto<i32>) -> Option<Self> {
-        Some(Self(x.try_into().ok()?, y.try_into().ok()?))
+impl Display for Coord {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "({}, {})", self.0, self.1)
     }
+}
 
+impl Coord {
     pub fn in_bound<T>(&self, grid: &Grid<T>) -> bool {
         self.0 >= 0
             && self.1 >= 0
@@ -36,8 +39,31 @@ impl Coord {
     }
 }
 
+impl<T> TryFrom<(T, T)> for Coord
+where
+    T: TryInto<i32>,
+{
+    type Error = <T as TryInto<i32>>::Error;
+
+    fn try_from(value: (T, T)) -> Result<Self, Self::Error> {
+        Ok(Self(value.0.try_into()?, value.1.try_into()?))
+    }
+}
+
 #[derive(Debug, PartialEq, Eq, Hash, Copy, Clone)]
 pub struct Vector(pub i32, pub i32);
+
+impl Display for Vector {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            v if *v == Vector::up() => write!(f, "Up"),
+            v if *v == Vector::down() => write!(f, "Down"),
+            v if *v == Vector::left() => write!(f, "Left"),
+            v if *v == Vector::right() => write!(f, "Right"),
+            Vector(i, j) => write!(f, "({i},{j})"),
+        }
+    }
+}
 
 impl Not for Vector {
     type Output = Vector;
@@ -56,6 +82,20 @@ impl Add<Vector> for Coord {
 }
 
 impl AddAssign<Vector> for Coord {
+    fn add_assign(&mut self, rhs: Vector) {
+        *self = *self + rhs;
+    }
+}
+
+impl Add<Vector> for Vector {
+    type Output = Self;
+
+    fn add(self, rhs: Vector) -> Self::Output {
+        Self(self.0 + rhs.0, self.1 + rhs.1)
+    }
+}
+
+impl AddAssign<Vector> for Vector {
     fn add_assign(&mut self, rhs: Vector) {
         *self = *self + rhs;
     }
@@ -99,6 +139,16 @@ impl Vector {
             _ => panic!(),
         }
     }
+
+    pub fn from_arrow(c: char) -> Self {
+        match c {
+            '>' => Self::right(),
+            'v' => Self::down(),
+            '<' => Self::left(),
+            '^' => Self::up(),
+            _ => panic!(),
+        }
+    }
 }
 
 pub trait IndexedIterCoord<T> {
@@ -113,6 +163,6 @@ impl<T> IndexedIterCoord<T> for Grid<T> {
         T: 'a,
     {
         self.indexed_iter()
-            .map(|((i, j), x)| (Coord::try_new(i, j).unwrap(), x))
+            .map(|((i, j), x)| (Coord::try_from((i, j)).unwrap(), x))
     }
 }
