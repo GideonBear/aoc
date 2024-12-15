@@ -53,7 +53,7 @@ impl Space {
 pub fn part_one(input: &str) -> Option<u32> {
     let mut lines = input.split('\n').peekable();
     let width = lines.peek().unwrap().len();
-    let mut grid = Grid::from_vec(
+    let grid = Grid::from_vec(
         lines.join("").chars().map(Space::from_char).collect(),
         width,
     );
@@ -62,13 +62,13 @@ pub fn part_one(input: &str) -> Option<u32> {
 
     for (coord, space) in grid.indexed_iter_coord() {
         if let Space::Antenna(c) = space {
-            map.entry(*c).or_insert(vec![]).push(coord)
+            map.entry(*c).or_default().push(coord)
         }
     }
 
     let mut antinodes: HashSet<Coord> = HashSet::new();
 
-    for (c, coords) in map {
+    for (_c, coords) in map {
         for (a, b) in coords
             .into_iter()
             .combinations(2)
@@ -87,7 +87,7 @@ pub fn part_one(input: &str) -> Option<u32> {
 pub fn part_two(input: &str) -> Option<u32> {
     let mut lines = input.split('\n').peekable();
     let width = lines.peek().unwrap().len();
-    let mut grid = Grid::from_vec(
+    let grid = Grid::from_vec(
         lines.join("").chars().map(Space::from_char).collect(),
         width,
     );
@@ -96,13 +96,13 @@ pub fn part_two(input: &str) -> Option<u32> {
 
     for (coord, space) in grid.indexed_iter_coord() {
         if let Space::Antenna(c) = space {
-            map.entry(*c).or_insert(vec![]).push(coord)
+            map.entry(*c).or_default().push(coord)
         }
     }
 
     let mut antinodes: HashSet<Coord> = HashSet::new();
 
-    for (c, coords) in map {
+    for (_c, coords) in map {
         for (a, b) in coords
             .into_iter()
             .combinations(2)

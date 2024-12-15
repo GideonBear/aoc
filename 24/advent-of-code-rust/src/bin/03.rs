@@ -27,12 +27,10 @@ pub fn part_two(input: &str) -> Option<u32> {
                 } else if name == "don't" {
                     enabled = false;
                     0
+                } else if enabled {
+                    a.parse::<u32>().unwrap() * b.parse::<u32>().unwrap()
                 } else {
-                    if enabled {
-                        a.parse::<u32>().unwrap() * b.parse::<u32>().unwrap()
-                    } else {
-                        0
-                    }
+                    0
                 }
             })
             .sum(),

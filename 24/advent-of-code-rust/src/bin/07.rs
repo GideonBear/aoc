@@ -38,7 +38,7 @@ pub fn part_one(input: &str) -> Option<u64> {
                             _ => unreachable!(),
                         }
                     }
-                    if u64::from(current) == value {
+                    if current == value {
                         return Some(value);
                     }
                 }
@@ -84,7 +84,7 @@ pub fn part_two(input: &str) -> Option<u64> {
                             _ => unreachable!(),
                         }
                     }
-                    if u64::from(current) == value {
+                    if current == value {
                         return Some(value);
                     }
                 }

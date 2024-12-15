@@ -45,7 +45,7 @@ pub fn part_one(input: &str) -> Option<u32> {
                         grid[(i, j)] = Space::Guard(new_vector);
                     }
                     Some(Space::Empty(_)) => {
-                        let vector = vector.clone();
+                        let vector = *vector;
                         grid[(i, j)] = Space::Empty(true);
                         grid[new_coord.val()] = Space::Guard(vector);
                     }
@@ -91,7 +91,7 @@ pub fn part_two(input: &str) -> Option<u32> {
                         grid[(i, j)] = Space::Guard(new_vector);
                     }
                     Some(Space::Empty(_)) => {
-                        let vector = vector.clone();
+                        let vector = *vector;
                         grid[(i, j)] = Space::Empty(true);
                         grid[new_coord.val()] = Space::Guard(vector);
                     }

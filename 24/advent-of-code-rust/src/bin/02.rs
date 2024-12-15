@@ -1,5 +1,3 @@
-use itertools::Itertools;
-
 advent_of_code::solution!(2);
 
 pub fn part_one(input: &str) -> Option<u32> {
@@ -9,8 +7,8 @@ pub fn part_one(input: &str) -> Option<u32> {
         .map(|r| r.map(|l| l.parse::<u32>().unwrap()).collect())
         .collect();
     let mut safe = 0;
-    'outer: for mut report in reports {
-        let first = report.get(0).unwrap();
+    'outer: for report in reports {
+        let first = report.first().unwrap();
         let second = report.get(1).unwrap();
         let allowed = if second > first {
             [1, 2, 3]
@@ -36,13 +34,13 @@ pub fn part_two(input: &str) -> Option<u32> {
         .map(|r| r.map(|l| l.parse::<u32>().unwrap()).collect())
         .collect();
     let mut safe = 0;
-    for mut o_report in reports {
+    for o_report in reports {
         'outer: for i in 0..(o_report.len() + 1) {
             let mut report = o_report.clone();
-            if (i != o_report.len()) {
+            if i != o_report.len() {
                 report.remove(i);
             }
-            let first = report.get(0).unwrap();
+            let first = report.first().unwrap();
             let second = report.get(1).unwrap();
             let allowed = if second > first {
                 [1, 2, 3]

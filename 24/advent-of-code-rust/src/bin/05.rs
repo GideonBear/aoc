@@ -2,7 +2,7 @@ use itertools::Itertools;
 
 advent_of_code::solution!(5);
 
-fn get_middle<T>(l: &Vec<T>) -> &T {
+fn get_middle<T>(l: &[T]) -> &T {
     l.get(l.len() / 2).unwrap()
 }
 
@@ -27,7 +27,7 @@ pub fn part_one(input: &str) -> Option<u32> {
             .iter()
             .filter(|update| {
                 for (a, b) in rules.iter() {
-                    if update.contains(&a) && update.contains(&b) {
+                    if update.contains(a) && update.contains(b) {
                         let ia = update.iter().position(|x| x == a);
                         let ib = update.iter().position(|x| x == b);
                         if ia > ib {
@@ -37,7 +37,7 @@ pub fn part_one(input: &str) -> Option<u32> {
                 }
                 true
             })
-            .map(get_middle)
+            .map(|x| get_middle(x))
             .sum(),
     )
 }
@@ -67,7 +67,7 @@ pub fn part_two(input: &str) -> Option<u32> {
                 while did_something {
                     did_something = false;
                     for (a, b) in rules.iter() {
-                        if new_update.contains(&a) && new_update.contains(&b) {
+                        if new_update.contains(a) && new_update.contains(b) {
                             let ia = new_update.iter().position(|x| x == a).unwrap();
                             let ib = new_update.iter().position(|x| x == b).unwrap();
                             if ia > ib {

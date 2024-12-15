@@ -20,7 +20,7 @@ pub fn part_one(input: &str) -> Option<u32> {
     Some(
         l1.into_iter()
             .zip(l2)
-            .map(|(v1, v2)| (v1 - v2).unsigned_abs() as u32)
+            .map(|(v1, v2)| (v1 - v2).unsigned_abs())
             .sum(),
     )
 }

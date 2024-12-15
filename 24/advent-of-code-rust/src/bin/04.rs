@@ -17,7 +17,7 @@ fn parse_char(c: char) -> u8 {
 pub fn part_one(input: &str) -> Option<u32> {
     let mut lines = input.split('\n').peekable();
     let width = lines.peek().unwrap().len();
-    let mut grid = Grid::from_vec(lines.join("").chars().map(parse_char).collect(), width);
+    let grid = Grid::from_vec(lines.join("").chars().map(parse_char).collect(), width);
 
     let mut count = 0;
     let mut to_print = vec![];
@@ -61,7 +61,7 @@ pub fn part_one(input: &str) -> Option<u32> {
 pub fn part_two(input: &str) -> Option<u32> {
     let mut lines = input.split('\n').peekable();
     let width = lines.peek().unwrap().len();
-    let mut grid = Grid::from_vec(lines.join("").chars().collect(), width);
+    let grid = Grid::from_vec(lines.join("").chars().collect(), width);
 
     let mut count = 0;
     // let mut to_print = vec![];
@@ -70,7 +70,7 @@ pub fn part_two(input: &str) -> Option<u32> {
         if x != 'A' {
             continue;
         }
-        let mut coord = Coord(i.try_into().unwrap(), j.try_into().unwrap());
+        let coord = Coord(i.try_into().unwrap(), j.try_into().unwrap());
         println!("{coord:?}");
         let mut bottom_right = None;
         let mut bottom_left = None;

@@ -3,8 +3,6 @@ use itertools::Itertools;
 advent_of_code::solution!(9);
 
 pub fn part_one(input: &str) -> Option<u64> {
-    return None;
-
     let mut disk: Vec<Option<u64>> = vec![];
     for (i, mut chunk) in input.to_string().chars().map(|x| x.to_string().parse().unwrap()).chunks(2).into_iter().enumerate() {
         let file = chunk.next().unwrap();
