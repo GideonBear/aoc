@@ -1,7 +1,7 @@
-use std::fmt::Display;
 use advent_of_code::{Coord, IndexedIterCoord, Vector};
 use grid::Grid;
 use itertools::Itertools;
+use std::fmt::Display;
 
 advent_of_code::solution!(15);
 
@@ -41,19 +41,14 @@ impl Space {
 #[derive(Clone, Copy, PartialEq, Debug)]
 enum SpaceTwoTemp {
     Empty,
-    Box {
-        is_right: bool,
-    },
+    Box { is_right: bool },
     Wall,
 }
 
 #[derive(Clone, Copy, PartialEq, Debug)]
 enum SpaceTwo {
     Empty,
-    Box {
-        is_right: bool,
-        other: Coord,
-    },
+    Box { is_right: bool, other: Coord },
     Wall,
 }
 
@@ -62,8 +57,14 @@ impl Display for SpaceTwo {
         match self {
             SpaceTwo::Empty => write!(f, "."),
             SpaceTwo::Wall => write!(f, "#"),
-            SpaceTwo::Box { is_right: false, other: _ } => write!(f, "["),
-            SpaceTwo::Box { is_right: true, other: _ } => write!(f, "]"),
+            SpaceTwo::Box {
+                is_right: false,
+                other: _,
+            } => write!(f, "["),
+            SpaceTwo::Box {
+                is_right: true,
+                other: _,
+            } => write!(f, "]"),
         }
     }
 }
@@ -197,28 +198,35 @@ pub fn part_two(input: &str) -> Option<u32> {
     let mut robot = Coord(robot.0, robot.1 * 2);
 
     let grid = Grid::from_vec(
-        grid
-            .iter()
+        grid.iter()
             .flat_map(|x| match x {
                 Space::Empty => vec![SpaceTwoTemp::Empty, SpaceTwoTemp::Empty],
                 Space::Wall => vec![SpaceTwoTemp::Wall, SpaceTwoTemp::Wall],
-                Space::Box => vec![SpaceTwoTemp::Box{ is_right: false }, SpaceTwoTemp::Box{ is_right: true }],
+                Space::Box => vec![
+                    SpaceTwoTemp::Box { is_right: false },
+                    SpaceTwoTemp::Box { is_right: true },
+                ],
             })
             .collect(),
         width,
     );
 
     let mut grid = Grid::from_vec(
-        grid
-            .indexed_iter_coord()
+        grid.indexed_iter_coord()
             .map(|(coord, x)| match x {
                 SpaceTwoTemp::Empty => SpaceTwo::Empty,
                 SpaceTwoTemp::Wall => SpaceTwo::Wall,
                 SpaceTwoTemp::Box { is_right } => {
                     if *is_right {
-                        SpaceTwo::Box { is_right: *is_right, other: coord + Vector::left() }
+                        SpaceTwo::Box {
+                            is_right: *is_right,
+                            other: coord + Vector::left(),
+                        }
                     } else {
-                        SpaceTwo::Box { is_right: *is_right, other: coord + Vector::right() }
+                        SpaceTwo::Box {
+                            is_right: *is_right,
+                            other: coord + Vector::right(),
+                        }
                     }
                 }
             })
@@ -234,12 +242,21 @@ pub fn part_two(input: &str) -> Option<u32> {
 
     fn move_box(space: SpaceTwo, vector: Vector) -> SpaceTwo {
         match space {
-            SpaceTwo::Box{ is_right, other } => SpaceTwo::Box{ is_right, other: other + vector},
+            SpaceTwo::Box { is_right, other } => SpaceTwo::Box {
+                is_right,
+                other: other + vector,
+            },
             space => space,
         }
     }
 
-    fn push(grid: &mut Grid<SpaceTwo>, coord: Coord, vector: Vector, indent: usize, really_do: bool) -> bool {
+    fn push(
+        grid: &mut Grid<SpaceTwo>,
+        coord: Coord,
+        vector: Vector,
+        indent: usize,
+        really_do: bool,
+    ) -> bool {
         let new = coord + vector;
         // print!("{}", " ".repeat(indent));
         // println!("I am a {} at {coord} and I need to push {vector} towards a {}", coord.get(&grid).unwrap(), new.get(&grid).unwrap());
@@ -255,7 +272,7 @@ pub fn part_two(input: &str) -> Option<u32> {
                 // Do nothing
                 false
             }
-            SpaceTwo::Box {is_right: _, other} => {
+            SpaceTwo::Box { is_right: _, other } => {
                 if [Vector::up(), Vector::down()].contains(&vector) {
                     // print!("{}", " ".repeat(indent));
                     // println!("  The thing I'm pushing against is a box, so this will push two things: {} and {}", new, *other);
@@ -333,7 +350,15 @@ pub fn part_two(input: &str) -> Option<u32> {
 
     Some(
         grid.indexed_iter_coord()
-            .filter(|(_coord, x)| matches!(x, SpaceTwo::Box { other: _, is_right: false }))
+            .filter(|(_coord, x)| {
+                matches!(
+                    x,
+                    SpaceTwo::Box {
+                        other: _,
+                        is_right: false
+                    }
+                )
+            })
             .map(|(coord, _x)| 100 * coord.0 + coord.1)
             .map(|x| u32::try_from(x).unwrap())
             .sum(),
