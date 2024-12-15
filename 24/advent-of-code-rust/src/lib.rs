@@ -1,5 +1,5 @@
-use std::fmt::Display;
 use grid::Grid;
+use std::fmt::Display;
 use std::ops::{Add, AddAssign, Not};
 
 pub mod template;
@@ -78,6 +78,25 @@ impl Add<Vector> for Coord {
 
     fn add(self, rhs: Vector) -> Self::Output {
         Self(self.0 + rhs.0, self.1 + rhs.1)
+    }
+}
+
+impl Coord {
+    pub fn wrapping_add(self, rhs: Vector, rows: i32, cols: i32) -> Self {
+        let mut coord = self + rhs;
+        if coord.0 >= rows {
+            coord.0 = coord.0 - rows;
+        }
+        if coord.1 >= cols {
+            coord.1 = coord.1 - cols;
+        }
+        if coord.0 < 0 {
+            coord.0 = rows - -coord.0;
+        }
+        if coord.1 < 0 {
+            coord.1 = cols - -coord.1;
+        }
+        coord
     }
 }
 
